@@ -221,16 +221,36 @@ const changePassword = asyncHandler(async (req, res) => {
 });
 
 //get current user
-const getCurrentUser = asyncHandler(async(req, res) => {
+const getCurrentUser = asyncHandler(async (req, res) => {
   // const newuser = User.findById(req.user?._id);
   // console.log(newuser);
-  return res
-  .status(200)
-  .json({
-    message:"Success",
-    data:req.user
-  })
-})
+  return res.status(200).json({
+    message: "Success",
+    data: req.user,
+  });
+});
+
+// update account details
+const updateAccountDetails = asyncHandler(async (req, res) => {
+  const { fullName, email } = req.body;
+  if (!fullName || !email) {
+    throw new ApiError(400, "Full name and email both are required");
+  }
+
+  const user = await User.findByIdAndUpdate(
+    req.user?._id,
+    {
+      $set: {
+        fullName,
+        email,
+      },
+    },
+    {
+      new: true,
+    }
+  ).select("-password");
+  res.status(200).json(new ApiResponse(200,user,"Update successfully"))
+});
 export {
   registerUser,
   loginUser,
@@ -238,4 +258,5 @@ export {
   refreshAccessToken,
   changePassword,
   getCurrentUser,
+  updateAccountDetails
 };
